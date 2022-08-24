@@ -79,73 +79,23 @@ enable_rendering:
 nmi:
   ldx #$00 	; Set SPR-RAM address to 0
   stx $2003
-@loop:	lda hello, x 	; Load the hello message into SPR-RAM
+@loop:	;lda hello, x 	; Load the hello message into SPR-RAM
   sta $2004
   inx
   cpx #$24
   bne @loop
   rti
 
-hello:
-  .byte $6c, $00, $0f, $6c  ; row, index, shade, column
-  .byte $6c, $01, $ff, $76
-  .byte $6c, $02, $af, $80
-  .byte $6c, $02, $00, $8a
-  .byte $6c, $03, $00, $94
-  .byte $6c, $03, $00, $a0
-  .byte $6c, $02, $00, $aa
-
 palettes:
-  ; Background Palette
-  .byte $0f, $00, $00, $00
-  .byte $0f, $00, $00, $00
-  .byte $0f, $00, $00, $00
-  .byte $0f, $00, $00, $00
+  .byte $22, $29, $1A, $0F
+  .byte $22, $36, $17, $0F
+  .byte $22, $30, $21, $0F
+  .byte $22, $27, $17, $0F
+  .byte $22, $16, $27, $18
+  .byte $22, $1A, $30, $27
+  .byte $22, $16, $30, $27
+  .byte $00, $0F, $36, $17    ; Sprite
 
-  ; Sprite Palette
-  .byte $0f, $20, $00, $00
-  .byte $0f, $00, $00, $00
-  .byte $0f, $00, $00, $00
-  .byte $0f, $00, $00, $00
-
-; Character memory
 .segment "CHARS"
-  .byte %11000011	; H (00)
-  .byte %11000011
-  .byte %11000011
-  .byte %11111111
-  .byte %11111111
-  .byte %11000011
-  .byte %11000011
-  .byte %11000011
-  .byte $00, $00, $00, $00, $00, $00, $00, $00
 
-  .byte %11111111	; E (01)
-  .byte %11111111
-  .byte %11000000
-  .byte %11111100
-  .byte %11111100
-  .byte %11000000
-  .byte %11111111
-  .byte %11111111
-  .byte $00, $00, $00, $00, $00, $00, $00, $00
-
-  .byte %11000000	; L (02)
-  .byte %11000000
-  .byte %11000000
-  .byte %11000000
-  .byte %11000000
-  .byte %11000000
-  .byte %11111111
-  .byte %11111111
-  .byte $00, $00, $00, $00, $00, $00, $00, $00
-
-  .byte %01111110	; O (03)
-  .byte %11100111
-  .byte %11000111
-  .byte %11001011
-  .byte %11010011
-  .byte %11100011
-  .byte %11100111
-  .byte %01111110
-  .byte $00, $00, $00, $00, $00, $00, $00, $00
+.incbin "mario.chr"
