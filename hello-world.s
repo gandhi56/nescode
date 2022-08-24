@@ -75,27 +75,24 @@ enable_rendering:
   lda #%00010000	; Enable Sprites
   sta $2001
 
-forever:
-  jmp forever
-
 nmi:
   ldx #$00 	; Set SPR-RAM address to 0
   stx $2003
 @loop:	lda hello, x 	; Load the hello message into SPR-RAM
   sta $2004
   inx
-  cpx #$1c
+  cpx #$24
   bne @loop
   rti
 
 hello:
-  .byte $00, $00, $00, $00 	; Why do I need these here?
-  .byte $00, $00, $00, $00
-  .byte $6c, $00, $00, $6c
-  .byte $6c, $01, $00, $76
-  .byte $6c, $02, $00, $80
-  .byte $6c, $02, $00, $8A
+  .byte $6c, $00, $0f, $6c  ; row, index, shade, column
+  .byte $6c, $01, $ff, $76
+  .byte $6c, $02, $af, $80
+  .byte $6c, $02, $00, $8a
   .byte $6c, $03, $00, $94
+  .byte $6c, $03, $00, $a0
+  .byte $6c, $02, $00, $aa
 
 palettes:
   ; Background Palette
@@ -144,10 +141,10 @@ palettes:
 
   .byte %01111110	; O (03)
   .byte %11100111
-  .byte %11000011
-  .byte %11000011
-  .byte %11000011
-  .byte %11000011
+  .byte %11000111
+  .byte %11001011
+  .byte %11010011
+  .byte %11100011
   .byte %11100111
   .byte %01111110
   .byte $00, $00, $00, $00, $00, $00, $00, $00
