@@ -39,7 +39,7 @@
 ;
   .bank 0
   .org $C000    ; Tells the assembler where to start this bank
-RESET:
+Reset:
   sei           ; disable IRQs
   cld           ; disable decimal mode, meant to make decimal
                 ; arithmetic "easier"
@@ -52,15 +52,15 @@ RESET:
   stx $2001     ; disable rendering
   stx $4010     ; disable DMC IRQs
 
-vblankwait1:
+VBlankWait1:
   bit $2002
-  bpl vblankwait1
+  bpl VBlankWait1
 
 ; +----------------+
 ; | Clear memory   |
 ; +----------------+
 ;
-clrmem:
+ClearMemory:
   lda #$00
   sta $0000, x
   sta $0100, x
@@ -72,30 +72,11 @@ clrmem:
   lda #$fe
   sta $0200, x  ; move all sprites off screen
   inx
-  bne clrmem
+  bne ClearMemory
 
-vblankwait2:    ; second wait for vblank, PPU is ready after this
+VBlankWait2:    ; second wait for vblank, PPU is ready after this
   bit $2002
-  bpl vblankwait2
-
-; +-----------------------+
-; | Load game palettes    |
-; +-----------------------+
-;
-LoadPalettes:
-  lda $2002     ; read PPU status to reset high/low latch
-  lda #$3f      ; max out 0011 1111
-  sta $2006
-  lda #$00
-  sta $2006
-  ldx #$00      ; start at 0
-
-LoadPalettesLoop:
-  lda palette, x
-  sta $2007
-  inx
-  cpx #$20
-  bne LoadPalettesLoop
+  bpl VBlankWait2
 
 MainLoop:
   lda #$00
@@ -104,25 +85,11 @@ MainLoop:
   sta $4014     ; set the high byte of the RAM address,
                 ; start the transfer
 
-  jsr Draw
+  ;jsr Draw
 
-  jsr Update
+  ;jsr Update
 
   rti           ; return from interrupt
-
-; +-----------------------+
-; | Data initialization   |
-; +-----------------------+
-; .db command is a macro for storing bytes
-; in memory without having to write
-  .bank 1
-  .org $e000
-palette:
-    ;; Background Palletes (0-3)
-  .db $08,$1A,$38,$18, $08,$02,$38,$3C, $08,$1C,$15,$14, $08,$02,$38,$2A
-  ;;  Character Palletes (0-3)
-  .db $21,$2C,$11,$15, $0F,$35,$36,$37, $0F,$39,$3A,$3B, $0F,$3D,$3E,$0F
-
 
 
 ; Define interrupt vectors at the top of memory $FFFF
@@ -139,11 +106,6 @@ nescallback:
   .dw MainLoop  ; when an NMI happens, jump to label NMI
   .dw Reset     ; when the processor is reset, jump to Reset
   .dw 0         ; external interrupt IRQ for audio
-
-; Load in external sprites or audio data here
-  .bank 2
-  .org $0000
-  .incbin "mario.chr"
 
 
 
