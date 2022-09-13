@@ -1,14 +1,12 @@
-SRC := hello-world.s hello-world2.s
-NES := $(SRC:.s=.nes)
 
-all: $(NES)
-hello-world.nes: hello-world.s
-	ca65 -o hello-world.o $<
-	ld65 -t nes -o $@ hello-world.o
+all: hellomario.nes spaceship.nes
+hellomario.nes: hellomario.asm
+	ca65 hellomario.asm -o hellomario.o --debug-info
+	ld65 hellomario.o -o hellomario.nes -t nes --dbgfile hellomario.dbg
 
-hello-world2.nes: hello-world2.s
-	ca65 -o hello-world2.o $<
-	ld65 -t nes -o $@ hello-world2.o
+spaceship.nes: spaceship.asm
+	ca65 spaceship.asm -o spaceship.o
+	ld65 spaceship.o -o spaceship.nes -t nes
 
 clean:
-	rm -rf *.o *.nes
+	del *.o *.nes
