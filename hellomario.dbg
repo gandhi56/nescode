@@ -1,7 +1,7 @@
 version	major=2,minor=0
 info	csym=0,file=2,lib=0,line=102,mod=1,scope=1,seg=10,span=94,sym=9,type=6
-file	id=0,name="hellomario.asm",size=2935,mtime=0x6321716F,mod=0
-file	id=1,name="mario.chr",size=8192,mtime=0x63202FDB,mod=0
+file	id=0,name="hellomario.s",size=2792,mtime=0x63D80BF0,mod=0
+file	id=1,name="mario.chr",size=8192,mtime=0x63D80BF0,mod=0
 line	id=0,file=0,line=104,span=67
 line	id=1,file=0,line=30,span=18
 line	id=2,file=0,line=19,span=12

@@ -1,12 +1,15 @@
-
-all: hellomario.nes spaceship.nes
-hellomario.nes: hellomario.asm
-	ca65 hellomario.asm -o hellomario.o --debug-info
+all: hellomario.nes spaceship.nes cart.nes
+hellomario.nes: hellomario.s
+	ca65 hellomario.s -o hellomario.o --debug-info
 	ld65 hellomario.o -o hellomario.nes -t nes --dbgfile hellomario.dbg
 
-spaceship.nes: spaceship.asm
-	ca65 spaceship.asm -o spaceship.o
+spaceship.nes: spaceship.s
+	ca65 spaceship.s -o spaceship.o
 	ld65 spaceship.o -o spaceship.nes -t nes
 
+cart.nes: cart.s
+	ca65 cart.s -o cart.o
+	ld65 cart.o -o cart.nes -t nes
+
 clean:
-	del *.o *.nes
+	rm *.o *.nes
