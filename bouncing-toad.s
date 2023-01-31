@@ -78,6 +78,10 @@ OAMDMA    = $4014
 .byte $00        ; No PRG-RAM present
 .byte $00        ; NTSC format
 
+.segment "ZEROPAGE"
+toad_x: .res 1  ; reserve 1 byte of memory
+toad_y: .res 1
+
 .segment "STARTUP"
 .segment "CODE"
 .proc irq_handler
@@ -85,10 +89,16 @@ OAMDMA    = $4014
 .endproc
 
 .proc nmi_handler
-    lda #$00
-    sta OAMADDR
     lda #$02
     sta OAMDMA
+    lda #$00
+    sta OAMADDR
+
+    jsr draw_toad
+
+    lda #$00
+    sta $2005
+    sta $2005
     rti
 .endproc
 
@@ -101,6 +111,12 @@ OAMDMA    = $4014
 vblankwait:
     bit PPUSTATUS
     bpl vblankwait
+
+    ; Initialize zeropage values here
+    lda #$a0
+    sta toad_y
+    lda #$44
+    sta toad_x
 .endproc
 
 .proc main
@@ -120,15 +136,6 @@ LoadPalette:
     cpx #$20
     bne LoadPalette
 
-    ;; Load toad sprite into PPU
-    ldx $00
-LoadToadSprite:
-    lda ToadSpriteData, x
-    sta $0200, x
-    inx
-    cpx $10
-    bne LoadToadSprite
-
 vblankwait:       ; wait for another vblank before continuing
     bit PPUSTATUS
     bpl vblankwait
@@ -140,6 +147,60 @@ vblankwait:       ; wait for another vblank before continuing
 
 forever:
     jmp forever
+.endproc
+
+.proc draw_toad
+    ; save registers
+    php
+    pha
+    txa
+    pha
+    tya
+    pha
+
+    ; write tile numbers
+    lda #$00
+    sta $0201
+    lda #$01
+    sta $0205
+    lda #$10
+    sta $0209
+    lda #$11
+    sta $020d
+
+    ; write tile attributes
+    lda #$00
+    sta $0202
+    sta $0206
+    sta $020a
+    sta $020e
+
+    ; write tile locations
+    lda toad_y
+    sta $0200   ; top left tile
+    sta $0204   ; top right tile
+    clc
+    adc #$08    ; add 8 to move to the next row
+    sta $0208   ; bottom left tile
+    sta $020c   ; bottom right tile
+
+    lda toad_x
+    sta $0203
+    sta $020b
+    clc
+    adc #$08
+    sta $0207
+    sta $020f
+
+    ; restore registers
+    pla
+    tay
+    pla
+    tax
+    pla
+    plp
+
+    rts
 .endproc
 
 ;;; Palette Data goes here ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
