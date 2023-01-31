@@ -193,4 +193,4 @@ BACKGROUNDPALETTEDATA:	;32 bytes
     ; specialized hardware interrupts
 
 .segment "CHARS"
-.incbin "rom.chr"
+.incbin "cart-rom.chr"
