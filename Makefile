@@ -1,7 +1,7 @@
 all: hellomario.nes spaceship.nes cart.nes bouncing-toad.nes
 hellomario.nes: hellomario.s
 	ca65 hellomario.s -o hellomario.o -t nes
-	ld65 hellomario.o -o hellomario.nes -t nes hellomario.dbg
+	ld65 hellomario.o -o hellomario.nes -t nes
 
 spaceship.nes: spaceship.s
 	ca65 spaceship.s -o spaceship.o -t nes

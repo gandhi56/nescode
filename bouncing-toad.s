@@ -81,6 +81,7 @@ OAMDMA    = $4014
 .segment "ZEROPAGE"
 toad_x: .res 1  ; reserve 1 byte of memory
 toad_y: .res 1
+toad_dir: .res 1
 
 .segment "STARTUP"
 .segment "CODE"
@@ -88,12 +89,14 @@ toad_y: .res 1
     rti
 .endproc
 
+;;; NMI handler - ---------------------------------------------------------+
 .proc nmi_handler
     lda #$02
     sta OAMDMA
     lda #$00
     sta OAMADDR
 
+    jsr update_toad
     jsr draw_toad
 
     lda #$00
@@ -101,7 +104,9 @@ toad_y: .res 1
     sta $2005
     rti
 .endproc
+;;; -----------------------------------------------------------------------+
 
+;;; Reset handler - -------------------------------------------------------+
 .proc reset_handler
     sei
     cld
@@ -119,6 +124,9 @@ vblankwait:
     sta toad_x
 .endproc
 
+;;; -----------------------------------------------------------------------+
+
+;;; main - load palettes, enable NMIs and turn on the screen --------------+
 .proc main
     ;; Prepare PPU to load a palette
     ldx PPUSTATUS
@@ -148,7 +156,57 @@ vblankwait:       ; wait for another vblank before continuing
 forever:
     jmp forever
 .endproc
+;;; +----------------------------------------------------------------------+
 
+;;; update_toad - update position of toad for movement --------------------+
+.proc update_toad
+    ; save registers
+    php
+    pha
+    txa
+    pha
+    tya
+    pha
+
+    ;; Check for boundary conditions
+    lda toad_x
+    cmp #$e0
+    bcc NoCollideRight  ; branch if away from the right edge
+
+    lda #$00
+    sta toad_dir        ; set direction to left
+    jmp DirectionSet
+
+NoCollideRight:
+    lda toad_x
+    cmp #$0a
+    bcs DirectionSet    ; branch if away from the left edge
+
+    lda #$01
+    sta toad_dir        ; set direction to right
+
+DirectionSet:
+    lda toad_dir
+    cmp #$01
+    beq MoveRight
+
+    dec toad_x
+    jmp Done
+MoveRight:
+    inc toad_x
+Done:
+    ; restore registers
+    pla
+    tay
+    pla
+    tax
+    pla
+    plp
+    rts
+.endproc
+;;; -----------------------------------------------------------------------+
+
+;;; draw_toad - to render the toad sprite at toad_y, toad_x ---------------+
 .proc draw_toad
     ; save registers
     php
@@ -202,20 +260,21 @@ forever:
 
     rts
 .endproc
+;;; +----------------------------------------------------------------------+
 
-;;; Palette Data goes here ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+;;; Palette Data goes here ------------------------------------------------+
 PaletteData:
     .byte $00, $0F, $00, $10, 	$00, $0A, $15, $01, 	$00, $29, $28, $27, 	$00, $34, $24, $14 	;background palettes
 	.byte $31, $0F, $15, $30, 	$00, $0F, $11, $30, 	$00, $0F, $30, $27, 	$00, $3C, $2C, $1C 	;sprite palettes
-;;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+;;; -----------------------------------------------------------------------+
 
-;;; Sprite Data goes here ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+;;; Sprite Data goes here -------------------------------------------------+
 ToadSpriteData:
     .byte $40, $00, $00, $40
     .byte $40, $01, $00, $48
     .byte $48, $10, $00, $40
     .byte $48, $11, $00, $48
-;;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+;;; -----------------------------------------------------------------------+
 
 .segment "VECTORS"
 .addr nmi_handler, reset_handler, irq_handler
